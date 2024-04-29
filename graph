@@ -1,0 +1,66 @@
+pip install networkx
+
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# Binary Search Tree
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def draw_bst(root, pos=None, x=0, y=0, layer=1):
+    if pos is None:
+        pos = {}
+    if root:
+        draw_bst(root.left, pos, x - 1 / (2 ** layer), y - 1, layer + 1)
+        pos[root.value] = (x, y)
+        draw_bst(root.right, pos, x + 1 / (2 ** layer), y - 1, layer + 1)
+        nx.draw_networkx_nodes(G, pos, nodelist=[root.value], node_size=700)
+        if root.left:
+            nx.draw_networkx_edges(G, pos, edgelist=[(root.value, root.left.value)])
+        if root.right:
+            nx.draw_networkx_edges(G, pos, edgelist=[(root.value, root.right.value)])
+
+# Road Network Graph
+def draw_graph(graph):
+    G = nx.DiGraph()
+    for node, neighbors in graph.items():
+        G.add_node(node)
+        for neighbor, weight in neighbors.items():
+            G.add_edge(node, neighbor, weight=weight)
+    pos = nx.spring_layout(G)
+    nx.draw(G, pos, with_labels=True, node_size=700, node_color='skyblue', font_size=10, font_weight='bold')
+    labels = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
+
+# Binary Search Tree Example
+root = Node(5)
+root.left = Node(3)
+root.right = Node(8)
+root.left.left = Node(2)
+root.left.right = Node(4)
+root.right.left = Node(7)
+root.right.right = Node(10)
+
+G = nx.Graph()
+plt.figure(figsize=(10, 5))
+draw_bst(root)
+plt.title('Binary Search Tree')
+plt.axis('off')
+plt.show()
+
+# Road Network Graph Example
+road_network = {
+    'A': {'B': 5, 'C': 10},
+    'B': {'C': 3, 'D': 7},
+    'C': {'D': 2},
+    'D': {'A': 4}
+}
+
+G = nx.DiGraph()
+plt.figure(figsize=(8, 5))
+draw_graph(road_network)
+plt.title('Road Network Graph')
+plt.show()
