@@ -1,0 +1,199 @@
+import heapq
+
+# Node class for Binary Search Tree
+class Node:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.left = None
+        self.right = None
+
+# Binary Search Tree class
+class BinarySearchTree:
+    def __init__(self):
+        self.root = None
+    
+    # Insertion method
+    def insert(self, key, value):
+        self.root = self._insert_recursively(self.root, key, value)
+    
+    # Helper method for insertion
+    def _insert_recursively(self, node, key, value):
+        if node is None:
+            return Node(key, value)
+        
+        if key < node.key:
+            node.left = self._insert_recursively(node.left, key, value)
+        elif key > node.key:
+            node.right = self._insert_recursively(node.right, key, value)
+        else:
+            node.value = value
+        
+        return node
+    
+    # Search method
+    def search(self, key):
+        return self._search_recursively(self.root, key)
+    
+    # Helper method for search
+    def _search_recursively(self, node, key):
+        if node is None:
+            return None
+        
+        if node.key == key:
+            return node.value
+        elif key < node.key:
+            return self._search_recursively(node.left, key)
+        else:
+            return self._search_recursively(node.right, key)
+    
+    # Deletion method
+    def delete(self, key):
+        self.root = self._delete_recursively(self.root, key)
+    
+    # Helper method for deletion
+    def _delete_recursively(self, node, key):
+        if node is None:
+            return node
+        
+        if key < node.key:
+            node.left = self._delete_recursively(node.left, key)
+        elif key > node.key:
+            node.right = self._delete_recursively(node.right, key)
+        else:
+            if node.left is None:
+                return node.right
+            elif node.right is None:
+                return node.left
+            
+            min_node = self._find_min(node.right)
+            node.key = min_node.key
+            node.value = min_node.value
+            node.right = self._delete_recursively(node.right, min_node.key)
+        
+        return node
+    
+    # Helper method to find the node with the minimum key in a subtree
+    def _find_min(self, node):
+        while node.left is not None:
+            node = node.left
+        return node
+
+# Road Network Graph class
+class RoadNetworkGraph:
+    def __init__(self):
+        self.vertices = {}
+    
+    # Method to add an intersection
+    def add_intersection(self, vertex_id, name):
+        if vertex_id not in self.vertices:
+            self.vertices[vertex_id] = {'name': name, 'edges': {}}
+    
+    # Method to add a house
+    def add_house(self, house_id, name, nearest_intersection_id):
+        self.vertices[house_id] = {'name': name, 'nearest_intersection': nearest_intersection_id, 'edges': {}}
+        self.vertices[nearest_intersection_id]['edges'][house_id] = {'road_id': None, 'road_length': 0}
+        self.vertices[house_id]['edges'][nearest_intersection_id] = {'road_id': None, 'road_length': 0}
+    
+    # Package distribution method using Dijkstra's algorithm
+    def package_distribution(self, start_intersection_id):
+        distances = {vertex_id: float('inf') for vertex_id in self.vertices}
+        distances[start_intersection_id] = 0
+        priority_queue = [(0, start_intersection_id)]
+        while priority_queue:
+            current_distance, current_vertex_id = heapq.heappop(priority_queue)
+            if current_distance > distances[current_vertex_id]:
+                continue
+            for neighbor_vertex_id, edge in self.vertices[current_vertex_id]['edges'].items():
+                distance = current_distance + edge['road_length']
+                if distance < distances[neighbor_vertex_id]:
+                    distances[neighbor_vertex_id] = distance
+                    heapq.heappush(priority_queue, (distance, neighbor_vertex_id))
+        return distances
+
+    # Method to find the shortest distance between two intersections
+    def shortest_distance(self, start_vertex_id, end_vertex_id):
+        distances = {vertex_id: float('inf') for vertex_id in self.vertices}
+        distances[start_vertex_id] = 0
+        priority_queue = [(0, start_vertex_id)]
+        while priority_queue:
+            current_distance, current_vertex_id = heapq.heappop(priority_queue)
+            if current_distance > distances[current_vertex_id]:
+                continue
+            for neighbor_vertex_id, edge in self.vertices[current_vertex_id]['edges'].items():
+                distance = current_distance + edge['road_length']
+                if distance < distances[neighbor_vertex_id]:
+                    distances[neighbor_vertex_id] = distance
+                    heapq.heappush(priority_queue, (distance, neighbor_vertex_id))
+        return distances[end_vertex_id]
+
+# Test cases for Binary Search Trees
+def test_binary_search_tree():
+    bst = BinarySearchTree()
+
+    # Test case 1: Insertion
+    bst.insert(5, 'City 5')
+    bst.insert(2, 'City 2')
+    bst.insert(8, 'City 8')
+    assert bst.search(5) == 'City 5'
+
+    # Test case 2: Deletion
+    bst.delete(2)
+    assert bst.search(2) is None
+
+    # Test case 3: Additional insertion and search
+    bst.insert(10, 'City 10')
+    bst.insert(3, 'City 3')
+    assert bst.search(10) == 'City 10'
+    assert bst.search(3) == 'City 3'
+
+# Test cases for Binary Search Trees
+def test_binary_search_tree():
+    bst = BinarySearchTree()
+
+    # Test case 1: Insertion
+    bst.insert(5, 'City 5')
+    bst.insert(2, 'City 2')
+    bst.insert(8, 'City 8')
+    assert bst.search(5) == 'City 5'
+
+    # Test case 2: Deletion
+    bst.delete(2)
+    assert bst.search(2) is None
+
+    # Test case 3: Additional insertion and search
+    bst.insert(10, 'City 10')
+    bst.insert(3, 'City 3')
+    assert bst.search(10) == 'City 10'
+    assert bst.search(3) == 'City 3'
+
+    print("Binary Search Tree tests passed successfully.")
+
+# Test cases for Road Network Graph
+def test_road_network_graph():
+    rng = RoadNetworkGraph()
+
+    # Test case 1: Adding intersections and houses
+    rng.add_intersection(1, 'Intersection 1')
+    rng.add_intersection(2, 'Intersection 2')
+    rng.add_house(101, 'House 101', 1)
+    rng.add_house(102, 'House 102', 2)
+    assert 101 in rng.vertices
+    assert 102 in rng.vertices
+
+    # Test case 2: Package distribution
+    distances = rng.package_distribution(1)
+    assert distances[101] == 0
+    assert distances[102] == 1
+
+    # Test case 3: Shortest distance between intersections
+    rng.vertices[1]['edges'][2] = {'road_id': None, 'road_length': 5}
+    rng.vertices[2]['edges'][1] = {'road_id': None, 'road_length': 5}
+    assert rng.shortest_distance(1, 2) == 5
+
+    print("Road Network Graph tests passed successfully.")
+
+# Run the tests
+test_binary_search_tree()
+test_road_network_graph()
+
